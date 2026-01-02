@@ -52,51 +52,22 @@ function RootLayoutNav() {
   return (
     <>
       <Stack screenOptions={{ headerShown: false, animation: 'none' }}>
-        {!hasSeenOnboarding ? (
-          <Stack.Screen name="onboarding" />
-        ) : !currentUser ? (
-          <>
-            <Stack.Screen name="auth/login" />
-            <Stack.Screen name="auth/register" />
-          </>
-        ) : currentUser.role === 'admin' ? (
-          <Stack.Screen 
-            name="admin/dashboard" 
-            options={{ 
-              headerShown: false
-            }} 
-          />
-        ) : currentUser.role === 'partner' ? (
-          <>
-            <Stack.Screen 
-              name="partner/dashboard" 
-              options={{ 
-                headerShown: false
-              }} 
-            />
-            <Stack.Screen 
-              name="chat/[id]" 
-              options={{ 
-                headerShown: false
-              }} 
-            />
-            <Stack.Screen 
-              name="settings" 
-              options={{ 
-                headerShown: false
-              }} 
-            />
-          </>
-        ) : (
-          <>
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="chat/[id]" />
-            <Stack.Screen name="premium" options={{ presentation: "modal" }} />
-            <Stack.Screen name="map" />
-            <Stack.Screen name="community" />
-            <Stack.Screen name="settings" />
-          </>
-        )}
+        <Stack.Screen name="onboarding" />
+        <Stack.Screen name="splash" />
+        <Stack.Screen name="auth/login" />
+        <Stack.Screen name="auth/register" />
+        <Stack.Screen name="admin/dashboard" />
+        <Stack.Screen name="admin/login" />
+        <Stack.Screen name="admin/users" />
+        <Stack.Screen name="partner/dashboard" />
+        <Stack.Screen name="partner/wallet" />
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="chat/[id]" />
+        <Stack.Screen name="premium" options={{ presentation: "modal" }} />
+        <Stack.Screen name="map" />
+        <Stack.Screen name="community" />
+        <Stack.Screen name="settings" />
+        <Stack.Screen name="modal" options={{ presentation: "modal" }} />
       </Stack>
       <GlobalLoader />
     </>
