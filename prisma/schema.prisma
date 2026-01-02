@@ -1,0 +1,139 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  PARTNER
+  SUPER_ADMIN
+}
+
+enum UserPlan {
+  FREE
+  PRO
+  PREMIUM
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  REJECTED
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id            String        @id @default(cuid())
+  email         String        @unique
+  name          String
+  password      String
+  role          UserRole      @default(USER)
+  plan          UserPlan      @default(FREE)
+  profileImage  String?
+  bio           String?
+  phoneNumber   String?
+  isActive      Boolean       @default(true)
+  
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  
+  quotaUsage    QuotaUsage[]
+  bookings      Booking[]
+  offers        Offer[]
+  reviews       Review[]
+  
+  @@index([email])
+  @@index([role])
+}
+
+model QuotaUsage {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  date            DateTime  @default(now())
+  dailyCount      Int       @default(0)
+  monthlyCount    Int       @default(0)
+  
+  feature         String
+  tokensUsed      Int       @default(0)
+  
+  createdAt       DateTime  @default(now())
+  
+  @@index([userId, date])
+  @@index([userId, feature])
+}
+
+model AdminSettings {
+  id                    String    @id @default(cuid())
+  key                   String    @unique
+  value                 String
+  description           String?
+  
+  updatedAt             DateTime  @updatedAt
+  updatedBy             String?
+  
+  @@index([key])
+}
+
+model Offer {
+  id            String    @id @default(cuid())
+  partnerId     String
+  partner       User      @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  
+  title         String
+  description   String
+  price         Float
+  date          String
+  image         String?
+  active        Boolean   @default(true)
+  boosted       Boolean   @default(false)
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  bookings      Booking[]
+  
+  @@index([partnerId])
+  @@index([active])
+}
+
+model Booking {
+  id            String          @id @default(cuid())
+  userId        String
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  offerId       String
+  offer         Offer           @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  
+  slot          String
+  amount        Float
+  status        BookingStatus   @default(PENDING)
+  
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  
+  @@index([userId])
+  @@index([offerId])
+  @@index([status])
+}
+
+model Review {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  targetId      String
+  rating        Int
+  comment       String?
+  
+  createdAt     DateTime  @default(now())
+  
+  @@index([userId])
+  @@index([targetId])
+}
