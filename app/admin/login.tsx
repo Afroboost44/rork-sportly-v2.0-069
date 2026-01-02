@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -12,6 +12,12 @@ export default function AdminLogin() {
   const [email, setEmail] = useState('admin@sportly.com');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (user?.role === 'admin') {
+      router.replace('/admin/dashboard');
+    }
+  }, [user, router]);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -41,11 +47,6 @@ export default function AdminLogin() {
       setLoading(false);
     }
   };
-
-  if (user?.role === 'admin') {
-    router.replace('/admin/dashboard');
-    return null;
-  }
 
   return (
     <View style={styles.container}>
