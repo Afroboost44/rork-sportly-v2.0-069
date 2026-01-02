@@ -5,10 +5,14 @@ import { prisma } from '../../lib/prisma';
 export const adminRouter = createTRPCRouter({
   getUsers: publicProcedure
     .query(async () => {
+      console.log('🔍 admin.getUsers called');
+      
       if (!prisma) {
+        console.error('❌ Prisma not initialized');
         throw new Error('Database not initialized. Run: npx prisma generate && npx prisma db push');
       }
 
+      console.log('✅ Prisma initialized, fetching users...');
       const users = await prisma.user.findMany({
         include: {
           quotaUsage: {
@@ -28,6 +32,8 @@ export const adminRouter = createTRPCRouter({
         },
       });
 
+      console.log(`📊 Found ${users.length} users in database`);
+      
       return users.map((user: any) => ({
         id: user.id,
         email: user.email,
