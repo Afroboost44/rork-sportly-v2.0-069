@@ -52,6 +52,7 @@ interface Booking {
 
 interface AppContextType {
   user: any;
+  setUser: (user: any) => void;
   currentUser: any;
   isLoading: boolean;
   globalLoading?: boolean;
@@ -397,7 +398,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AppContext.Provider value={{ 
-      user, 
+      user,
+      setUser, 
       currentUser: user,
       isLoading, 
       profiles, 
