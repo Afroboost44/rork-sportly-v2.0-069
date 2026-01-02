@@ -38,7 +38,6 @@ model User {
   bio           String?
   phoneNumber   String?
   isActive      Boolean       @default(true)
-  
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
   
@@ -46,27 +45,19 @@ model User {
   bookings      Booking[]
   offers        Offer[]
   reviews       Review[]
-  
-  @@index([email])
-  @@index([role])
 }
 
 model QuotaUsage {
   id              String    @id @default(cuid())
   userId          String
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
   date            DateTime  @default(now())
   dailyCount      Int       @default(0)
   monthlyCount    Int       @default(0)
-  
   feature         String
   tokensUsed      Int       @default(0)
-  
   createdAt       DateTime  @default(now())
   
-  @@index([userId, date])
-  @@index([userId, feature])
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model AdminSettings {
@@ -74,18 +65,13 @@ model AdminSettings {
   key                   String    @unique
   value                 String
   description           String?
-  
   updatedAt             DateTime  @updatedAt
   updatedBy             String?
-  
-  @@index([key])
 }
 
 model Offer {
   id            String    @id @default(cuid())
   partnerId     String
-  partner       User      @relation(fields: [partnerId], references: [id], onDelete: Cascade)
-  
   title         String
   description   String
   price         Float
@@ -93,47 +79,34 @@ model Offer {
   image         String?
   active        Boolean   @default(true)
   boosted       Boolean   @default(false)
-  
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   
+  partner       User      @relation(fields: [partnerId], references: [id], onDelete: Cascade)
   bookings      Booking[]
-  
-  @@index([partnerId])
-  @@index([active])
 }
 
 model Booking {
   id            String          @id @default(cuid())
   userId        String
-  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
   offerId       String
-  offer         Offer           @relation(fields: [offerId], references: [id], onDelete: Cascade)
-  
   slot          String
   amount        Float
   status        BookingStatus   @default(PENDING)
-  
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
   
-  @@index([userId])
-  @@index([offerId])
-  @@index([status])
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  offer         Offer           @relation(fields: [offerId], references: [id], onDelete: Cascade)
 }
 
 model Review {
   id            String    @id @default(cuid())
   userId        String
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
   targetId      String
   rating        Int
   comment       String?
-  
   createdAt     DateTime  @default(now())
   
-  @@index([userId])
-  @@index([targetId])
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
