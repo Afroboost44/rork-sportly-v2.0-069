@@ -1,14 +1,49 @@
-import React, { useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Platform } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Platform, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { LogOut, ShieldCheck, Users, DollarSign, Settings, UserCog, Activity } from 'lucide-react-native';
+import { LogOut, ShieldCheck, Users, DollarSign, Settings, UserCog, Activity, Database } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAppContext } from '../../contexts/AppContext';
+import { trpc } from '@/lib/trpc';
 
 export default function AdminDashboard() {
   const router = useRouter();
   const { user, logout, users, bookings, offers } = useAppContext();
+  const [isSeeding, setIsSeeding] = useState(false);
+  
+  const seedMutation = trpc.admin.seedDatabase.useMutation({
+    onSuccess: (data) => {
+      setIsSeeding(false);
+      Alert.alert(
+        '✅ Succès',
+        data.message + '\n\nAllez dans "Gestion Utilisateurs" pour voir la liste.',
+        [{ text: 'OK' }]
+      );
+    },
+    onError: (error) => {
+      setIsSeeding(false);
+      Alert.alert('❌ Erreur', error.message);
+    },
+  });
+
+  const handleSeedDatabase = () => {
+    Alert.alert(
+      '⚠️ Réinitialiser les données',
+      'Cela va SUPPRIMER toutes les données existantes et créer 8 utilisateurs de test.\n\nContinuer ?',
+      [
+        { text: 'Annuler', style: 'cancel' },
+        {
+          text: 'Réinitialiser',
+          style: 'destructive',
+          onPress: () => {
+            setIsSeeding(true);
+            seedMutation.mutate();
+          },
+        },
+      ]
+    );
+  };
 
   useEffect(() => {
     if (!user || user.role !== 'admin') {
@@ -74,6 +109,33 @@ export default function AdminDashboard() {
           <Text style={styles.sectionTitle}>Actions Administrateur</Text>
 
           <TouchableOpacity 
+            onPress={handleSeedDatabase}
+            style={styles.actionCard}
+            disabled={isSeeding}
+          >
+            <LinearGradient
+              colors={['#D91CD2', '#A913A1']}
+              style={styles.actionCardGradient}
+            >
+              <View style={styles.actionIcon}>
+                {isSeeding ? (
+                  <ActivityIndicator size="small" color="white" />
+                ) : (
+                  <Database color="white" size={24} />
+                )}
+              </View>
+              <View style={styles.actionContent}>
+                <Text style={[styles.actionTitle, {color: 'white'}]}>
+                  {isSeeding ? 'Réinitialisation...' : 'Réinitialiser les données (SEED)'}
+                </Text>
+                <Text style={[styles.actionDesc, {color: '#FFE5FF'}]}>
+                  Créer 8 utilisateurs de test avec quotas
+                </Text>
+              </View>
+            </LinearGradient>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
             onPress={() => router.push('/admin/users')}
             style={styles.actionCard}
           >
@@ -110,10 +172,11 @@ export default function AdminDashboard() {
           </TouchableOpacity>
 
           <View style={styles.infoBox}>
-            <Text style={styles.infoTitle}>📋 Prochaines Étapes</Text>
-            <Text style={styles.infoText}>• Générer Prisma : npx prisma generate</Text>
-            <Text style={styles.infoText}>• Créer DB : npx prisma db push</Text>
-            <Text style={styles.infoText}>• Migrer vers PostgreSQL (production)</Text>
+            <Text style={styles.infoTitle}>📋 Instructions</Text>
+            <Text style={styles.infoText}>1. Cliquez sur &quot;Réinitialiser les données&quot; ci-dessus</Text>
+            <Text style={styles.infoText}>2. Accédez à &quot;Gestion Utilisateurs&quot;</Text>
+            <Text style={styles.infoText}>3. Testez le bannissement de Pierre Martin</Text>
+            <Text style={[styles.infoText, {marginTop: 10, color: '#D91CD2'}]}>Base de données : SQLite locale (dev.db)</Text>
           </View>
         </ScrollView>
       </SafeAreaView>
